@@ -1,0 +1,43 @@
+Project Name:
+
+Explainable Local Wildfire Risk Intelligence System
+
+Problem:
+
+Wildfires cause severe environmental damage, economic loss, and threats to human life.
+Identifying high-risk wildfire conditions at a local and regional level is challenging,
+especially in areas that require continuous and careful surveillance due to climate variability
+and changing weather patterns.
+
+Solution:
+
+This project uses historical wildfire records combined with weather data to assess wildfire risk 
+based on current environmental conditions. A Random Forest machine learning model is used to 
+generate a risk score and classify areas into risk levels. 
+The system also provides explainable insights by highlighting the key weather factors—such as 
+wind speed, humidity, and temperature—that contribute most to the predicted risk.
+
+Why It Is Unique:
+
+Unlike traditional prediction systems that provide only a risk label, this system focuses on 
+explainability and local context. It helps users understand why a specific area requires closer 
+surveillance by clearly showing how individual environmental factors influence wildfire risk. 
+This improves trust and usability for decision-makers.
+
+Users:
+
+Local and regional authorities
+Disaster management and emergency response teams
+Environmental researchers and planners
+
+Real-World Impact:
+
+By identifying areas that need to be monitored more carefully, this system can support early planning, 
+resource allocation, and preventive measures. 
+It serves as a decision-support tool that helps stakeholders prioritize surveillance efforts in 
+wildfire-prone regions, potentially reducing damage through timely awareness and preparedness.
+
+What the System Does NOT Claim:
+
+This project does not claim to provide real-time wildfire alerts or automatic emergency responses. 
+It is designed as an offline, data-driven risk assessment and decision-support system.
