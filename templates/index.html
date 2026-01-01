@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>FireGuard – Wildfire Risk Intelligence</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <style>
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: linear-gradient(135deg, #0f172a, #1e293b);
+      color: #e5e7eb;
+      min-height: 100vh;
+    }
+
+    .header {
+      background: rgba(0,0,0,0.6);
+      padding: 16px 24px;
+      border-bottom: 1px solid #334155;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, #f97316, #dc2626);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+    }
+
+    .status {
+      font-size: 13px;
+      color: #4ade80;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 32px auto;
+      padding: 0 16px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+
+    @media (max-width: 900px) {
+      .container {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .panel {
+      background: rgba(30, 41, 59, 0.9);
+      border: 1px solid #334155;
+      border-radius: 10px;
+      padding: 20px;
+    }
+
+    .panel h3 {
+      margin-top: 0;
+      font-size: 14px;
+      letter-spacing: 1px;
+      color: #cbd5f5;
+      text-transform: uppercase;
+    }
+
+    select, input {
+      width: 100%;
+      padding: 12px;
+      margin-top: 10px;
+      border-radius: 8px;
+      border: 1px solid #334155;
+      background: #020617;
+      color: #e5e7eb;
+      font-size: 14px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    button {
+      margin-top: 16px;
+      width: 100%;
+      padding: 12px;
+      font-weight: 600;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      background: linear-gradient(135deg, #f97316, #dc2626);
+      color: white;
+      font-size: 15px;
+    }
+
+    .result {
+      display: none;
+      margin-top: 16px;
+      padding: 16px;
+      border-radius: 8px;
+      background: rgba(0,0,0,0.4);
+    }
+
+    .risk {
+      font-size: 24px;
+      font-weight: bold;
+    }
+
+    .low { color: #22c55e; }
+    .medium { color: #eab308; }
+    .high { color: #ef4444; }
+
+    ul {
+      padding-left: 18px;
+      margin-top: 8px;
+    }
+
+    .alert {
+      margin-top: 12px;
+      padding: 12px;
+      border-radius: 6px;
+      font-size: 14px;
+    }
+
+    .alert.low {
+      background: rgba(34,197,94,0.15);
+      color: #4ade80;
+    }
+
+    .alert.medium {
+      background: rgba(234,179,8,0.15);
+      color: #fde047;
+    }
+
+    .alert.high {
+      background: rgba(239,68,68,0.15);
+      color: #f87171;
+    }
+
+    footer {
+      margin: 40px 0 16px;
+      text-align: center;
+      font-size: 12px;
+      color: #9ca3af;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="header">
+  <div class="title">
+    <div class="logo">🔥</div>
+    <div>
+      <strong>FireGuard</strong><br>
+      <small>Explainable Wildfire Risk Intelligence</small>
+    </div>
+  </div>
+  <div class="status">● ML Demo Active</div>
+</div>
+
+<div class="container">
+
+  <!-- INPUT PANEL -->
+  <div class="panel">
+    <h3>Weather Inputs</h3>
+
+    <select id="city">
+      <option value="">Select City (Auto Weather)</option>
+      <option value="chennai">Chennai</option>
+      <option value="bengaluru">Bengaluru</option>
+      <option value="los_angeles">Los Angeles</option>
+      <option value="sydney">Sydney</option>
+      <option value="lisbon">Lisbon</option>
+    </select>
+
+    <button onclick="fetchWeather()">Auto-fill Weather</button>
+
+    <div class="grid">
+      <input id="temp_mean" placeholder="Temp Mean (°C)" />
+      <input id="temp_range" placeholder="Temp Range (°C)" />
+      <input id="humidity_min" placeholder="Min Humidity (%)" />
+      <input id="wind_speed_max" placeholder="Max Wind Speed" />
+      <input id="pressure_mean" placeholder="Pressure Mean" />
+      <input id="solar_radiation_mean" placeholder="Solar Radiation" />
+      <input id="cloud_cover_mean" placeholder="Cloud Cover (%)" />
+    </div>
+
+    <button onclick="assessRisk()">Assess Wildfire Risk</button>
+  </div>
+
+  <!-- OUTPUT PANEL -->
+  <div class="panel">
+    <h3>Risk Assessment</h3>
+
+    <div id="resultBox" class="result">
+      <div>Wildfire Occurrence Probability</div>
+      <div id="probability" class="risk"></div>
+
+      <div style="margin-top:10px;">Risk Level</div>
+      <div id="riskLevel" class="risk"></div>
+
+      <div style="margin-top:12px;">
+        <strong>Key Contributing Factors</strong>
+        <ul id="factors"></ul>
+      </div>
+
+      <div id="alertBox" class="alert"></div>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  ML-based decision-support demo using historical data
+</footer>
+
+<script>
+async function fetchWeather() {
+  const city = document.getElementById("city").value;
+  if (!city) {
+    alert("Please select a city");
+    return;
+  }
+
+  const res = await fetch("/weather-by-city", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({ city })
+  });
+
+  const data = await res.json();
+  if (data.error) {
+    alert(data.error);
+    return;
+  }
+
+  for (const key in data) {
+    if (document.getElementById(key)) {
+      document.getElementById(key).value = data[key];
+    }
+  }
+}
+
+async function assessRisk() {
+  const payload = {
+    temp_mean: temp_mean.value,
+    temp_range: temp_range.value,
+    humidity_min: humidity_min.value,
+    wind_speed_max: wind_speed_max.value,
+    pressure_mean: pressure_mean.value,
+    solar_radiation_mean: solar_radiation_mean.value,
+    cloud_cover_mean: cloud_cover_mean.value
+  };
+
+  const res = await fetch("/predict", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify(payload)
+  });
+
+  const data = await res.json();
+  if (data.error) {
+    alert(data.error);
+    return;
+  }
+
+  document.getElementById("resultBox").style.display = "block";
+  document.getElementById("probability").textContent = data.probability;
+  document.getElementById("riskLevel").textContent = data.risk_level;
+
+  const riskClass = data.risk_level.toLowerCase();
+  document.getElementById("riskLevel").className = "risk " + riskClass;
+
+  const factors = document.getElementById("factors");
+  factors.innerHTML = "";
+  data.top_factors.forEach(f => {
+    const li = document.createElement("li");
+    li.textContent = f;
+    factors.appendChild(li);
+  });
+
+  const alertBox = document.getElementById("alertBox");
+  alertBox.className = "alert " + riskClass;
+
+  if (data.risk_level === "HIGH") {
+    alertBox.textContent = "⚠️ High risk detected. Close surveillance recommended.";
+  } else if (data.risk_level === "MEDIUM") {
+    alertBox.textContent = "⚠️ Moderate risk. Monitor conditions.";
+  } else {
+    alertBox.textContent = "✅ Low risk under current conditions.";
+  }
+}
+</script>
+
+</body>
+</html>
