@@ -92,3 +92,8 @@ The dashboard allows users to:
 
 ## 📸 Screenshots
 
+### Dashboard – Weather Input & Risk Output
+![Dashboard](screenshots/dashboard.png)
+
+### Explainable Risk Assessment
+![fetched data](screenshots/fetched_data.png)
