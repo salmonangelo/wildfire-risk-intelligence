@@ -13,7 +13,13 @@ app = Flask(__name__)
 # Load Trained ML Model
 # -----------------------------
 MODEL_PATH = os.path.join("model", "wildfire_rf_model.pkl")
-model = joblib.load(MODEL_PATH)
+model = None
+
+def get_model():
+    global model
+    if model is None:
+        model = joblib.load(MODEL_PATH)
+    return model
 
 # -----------------------------
 # Feature Order (MUST MATCH TRAINING)
@@ -124,6 +130,7 @@ def predict():
         X = pd.DataFrame([input_row])
 
         # Predict wildfire occurrence probability
+        model = get_model()
         probability = float(model.predict_proba(X)[0][1])
         risk_level = get_risk_level(probability)
 
@@ -153,8 +160,4 @@ def predict():
 # App Runner
 # -----------------------------
 if __name__ == "__main__":
-    app.run(
-        host="127.0.0.1",
-        port=5000,
-        debug=True
-    )
+    pass
