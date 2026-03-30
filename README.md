@@ -96,4 +96,4 @@ The dashboard allows users to:
 ![Dashboard](screenshots/dashboard.png)
 
 ### Explainable Risk Assessment
-![fetched data](screenshots/fetched_data.png)
+![fetched data](screenshots/fetched_data1.png)
