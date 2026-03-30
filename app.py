@@ -4,13 +4,10 @@ import pandas as pd
 import requests
 import os
 
-# -----------------------------
-# App Initialization
-# -----------------------------
 app = Flask(__name__)
 
 # -----------------------------
-# Load Trained ML Model
+# Load Model (Lazy Loading)
 # -----------------------------
 MODEL_PATH = os.path.join("model", "wildfire_rf_model.pkl")
 model = None
@@ -22,7 +19,18 @@ def get_model():
     return model
 
 # -----------------------------
-# Feature Order (MUST MATCH TRAINING)
+# Safe Float Conversion
+# -----------------------------
+def safe_float(value, default=0.0):
+    try:
+        if value is None or value == "":
+            return default
+        return float(value)
+    except:
+        return default
+
+# -----------------------------
+# Features (must match training)
 # -----------------------------
 FEATURES = [
     "temp_mean",
@@ -35,7 +43,7 @@ FEATURES = [
 ]
 
 # -----------------------------
-# Predefined Cities (lat, lon)
+# Cities
 # -----------------------------
 CITIES = {
     "chennai": {"lat": 13.0827, "lon": 80.2707},
@@ -46,7 +54,7 @@ CITIES = {
 }
 
 # -----------------------------
-# Risk Mapping Logic
+# Risk Mapping
 # -----------------------------
 def get_risk_level(probability: float) -> str:
     if probability < 0.33:
@@ -57,19 +65,14 @@ def get_risk_level(probability: float) -> str:
         return "HIGH"
 
 # -----------------------------
-# Routes
+# Home Route
 # -----------------------------
-
 @app.route("/")
 def home():
-    """
-    Serves the frontend dashboard.
-    """
     return render_template("index.html")
 
-
 # -----------------------------
-# Weather Auto-Fetch by City
+# Weather API
 # -----------------------------
 @app.route("/weather-by-city", methods=["POST"])
 def weather_by_city():
@@ -92,49 +95,46 @@ def weather_by_city():
         response = requests.get(url, timeout=10).json()
 
         weather = {
-            "temp_mean": response["current"]["temperature_2m"],
-            "wind_speed_max": response["current"]["wind_speed_10m"],
-            "cloud_cover_mean": response["current"]["cloud_cover"],
-            "pressure_mean": response["hourly"]["surface_pressure"][0],
-            "humidity_min": response["hourly"]["relative_humidity_2m"][0],
-            "solar_radiation_mean": response["hourly"]["shortwave_radiation"][0],
-            "temp_range": 5  # adjustable by user
+            "temp_mean": safe_float(response["current"].get("temperature_2m")),
+            
+            # convert m/s → km/h
+            "wind_speed_max": safe_float(response["current"].get("wind_speed_10m")) * 3.6,
+            
+            "cloud_cover_mean": safe_float(response["current"].get("cloud_cover")),
+            "pressure_mean": safe_float(response["hourly"]["surface_pressure"][0]),
+            "humidity_min": safe_float(response["hourly"]["relative_humidity_2m"][0]),
+            "solar_radiation_mean": safe_float(response["hourly"]["shortwave_radiation"][0]),
+            "temp_range": 5
         }
 
         return jsonify(weather)
 
     except Exception as e:
+        print("WEATHER ERROR:", str(e))
         return jsonify({
             "error": "Weather data fetch failed",
             "details": str(e)
         }), 500
 
-
 # -----------------------------
-# Wildfire Risk Prediction
+# Prediction Route
 # -----------------------------
 @app.route("/predict", methods=["POST"])
 def predict():
     try:
         data = request.get_json()
 
-        # Validate required features
-        missing = [f for f in FEATURES if f not in data]
-        if missing:
-            return jsonify({
-                "error": f"Missing features: {', '.join(missing)}"
-            }), 400
+        # Safe input handling
+        input_row = {f: safe_float(data.get(f)) for f in FEATURES}
 
-        # Build input DataFrame
-        input_row = {f: float(data[f]) for f in FEATURES}
-        X = pd.DataFrame([input_row])
+        # Ensure correct order
+        X = pd.DataFrame([input_row])[FEATURES]
 
-        # Predict wildfire occurrence probability
         model = get_model()
+
         probability = float(model.predict_proba(X)[0][1])
         risk_level = get_risk_level(probability)
 
-        # Feature importance (Explainability)
         importance_df = pd.DataFrame({
             "feature": FEATURES,
             "importance": model.feature_importances_
@@ -142,7 +142,6 @@ def predict():
 
         top_factors = importance_df.head(3)["feature"].tolist()
 
-        # Response
         return jsonify({
             "probability": round(probability, 2),
             "risk_level": risk_level,
@@ -150,14 +149,14 @@ def predict():
         })
 
     except Exception as e:
+        print("PREDICT ERROR:", str(e))   # 👈 VERY IMPORTANT
         return jsonify({
             "error": "Prediction failed",
             "details": str(e)
         }), 500
 
-
 # -----------------------------
-# App Runner
+# Run App
 # -----------------------------
 if __name__ == "__main__":
-    pass
+    app.run(debug=True)
