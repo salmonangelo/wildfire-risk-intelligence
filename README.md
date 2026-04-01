@@ -1,4 +1,4 @@
-﻿# 🔥 FireGuard: Explainable Wildfire Risk Intelligence
+# 🔥 FireGuard: Explainable Wildfire Risk Intelligence
 
 FireGuard is an **explainable machine learning–based decision-support system** that predicts wildfire occurrence risk using meteorological conditions.  
 Instead of producing only a binary prediction, FireGuard provides a **risk probability, risk level, and key contributing environmental factors**, making the system transparent and actionable.
@@ -98,3 +98,27 @@ The dashboard allows users to:
 ### Explainable Risk Assessment
 ![fetched data](screenshots/fetched_data_1.png)
 ![fetched data](screenshots/fetched_data_2.png)
+
+---
+
+## 🚀 How to Run
+
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/salmonangelo/wildfire-risk-intelligence.git
+   cd wildfire-risk-intelligence
+   ```
+
+2. **Install dependencies:**
+   Make sure you have Python installed, then run:
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+3. **Run the Flask application:**
+   ```bash
+   python app.py
+   ```
+
+4. **Access the Web Dashboard:**
+   Open your browser and navigate to [http://127.0.0.1:5000](http://127.0.0.1:5000) or `http://localhost:5000`
